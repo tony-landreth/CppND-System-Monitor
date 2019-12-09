@@ -8,7 +8,7 @@
 namespace LinuxParser {
 // Paths
 const std::string kProcDirectory{"/proc/"};
-const std::string kCmdlineFilename{"/cmdline"};
+const std::string kCommFilename{"/comm"};
 const std::string kCpuinfoFilename{"/cpuinfo"};
 const std::string kStatusFilename{"/status"};
 const std::string kStatFilename{"/stat"};
@@ -41,12 +41,13 @@ enum CPUStates {
   kGuestNice_
 };
 
+// Uses 0-based indexing
 enum CPUTime {
-  kUTime_ = 14,
+  kUTime_ = 12,
   kSTime_,
   kCUTime_,
   kCSTime_,
-  kStartTime_ = 22
+  kStartTime_ = 20
 };
 
 float CpuUtilization();
@@ -62,6 +63,7 @@ std::string Uid(int pid);
 std::string User(int pid);
 long int UpTime(int pid);
 float CpuUtilization(int pid);
+std::istringstream StringStreamFromStatFile(std::string file_path, std::string key);
 };  // namespace LinuxParser
 
 #endif
