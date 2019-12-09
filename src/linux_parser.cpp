@@ -1,9 +1,11 @@
+#include "linux_parser.h"
+
 #include <dirent.h>
 #include <unistd.h>
+
+#include <iostream>
 #include <string>
 #include <vector>
-#include <iostream>
-#include "linux_parser.h"
 
 using std::stof;
 using std::string;
@@ -84,7 +86,7 @@ float LinuxParser::MemoryUtilization() {
       }
     }
   }
-  return (mem_total - mem_free)/mem_total;
+  return (mem_total - mem_free) / mem_total;
 }
 
 long int LinuxParser::UpTime() {
@@ -102,7 +104,7 @@ long int LinuxParser::UpTime() {
 }
 
 long LinuxParser::Jiffies() {
- return LinuxParser::ActiveJiffies() + LinuxParser::IdleJiffies();
+  return LinuxParser::ActiveJiffies() + LinuxParser::IdleJiffies();
 }
 
 long LinuxParser::ActiveJiffies(int pid) {
@@ -115,9 +117,11 @@ long LinuxParser::ActiveJiffies(int pid) {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
 
-      while (linestream >> key >> user >> nice >> system >> idle >> iowait >> irq >> softirq >> steal) {
+      while (linestream >> key >> user >> nice >> system >> idle >> iowait >>
+             irq >> softirq >> steal) {
         if (key == "cpu") {
-          value = stol(user) + stol(nice) + stol(system) + stol(irq) + stol(softirq) + stol(steal);
+          value = stol(user) + stol(nice) + stol(system) + stol(irq) +
+                  stol(softirq) + stol(steal);
         }
       }
     }
@@ -126,7 +130,8 @@ long LinuxParser::ActiveJiffies(int pid) {
   return value;
 }
 
-std::istringstream LinuxParser::StringStreamFromStatFile(string file_path, string key) {
+std::istringstream LinuxParser::StringStreamFromStatFile(string file_path,
+                                                         string key) {
   string line, k;
   std::ifstream filestream(file_path);
 
@@ -148,15 +153,16 @@ std::istringstream LinuxParser::StringStreamFromStatFile(string file_path, strin
 long LinuxParser::ActiveJiffies() {
   string line, key, val;
   int long j_sum = 0;
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(kProcDirectory + kStatFilename, "cpu");
+  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(
+      kProcDirectory + kStatFilename, "cpu");
 
   int i = 0;
-  while(linestream >> val) {
-    if(i >= kUser_ && i <= kSystem_) {
+  while (linestream >> val) {
+    if (i >= kUser_ && i <= kSystem_) {
       j_sum += stol(val);
     }
 
-    if(i >= kIRQ_ && i <= kSteal_) {
+    if (i >= kIRQ_ && i <= kSteal_) {
       j_sum += stol(val);
     }
 
@@ -170,7 +176,8 @@ long LinuxParser::IdleJiffies() {
   string line, key, val;
   int long idle_jiffies = 0;
 
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(kProcDirectory + kStatFilename, "cpu");
+  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(
+      kProcDirectory + kStatFilename, "cpu");
 
   int i = 0;
   while (linestream >> val) {
@@ -187,7 +194,7 @@ float LinuxParser::CpuUtilization() {
   float active = LinuxParser::ActiveJiffies();
   float total = LinuxParser::Jiffies();
 
-  return active/total;
+  return active / total;
 }
 
 float LinuxParser::CpuUtilization(int pid) {
@@ -196,26 +203,33 @@ float LinuxParser::CpuUtilization(int pid) {
   float utime, stime, cutime, cstime, starttime;
   int uptime = LinuxParser::UpTime();
 
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(file_path, to_string(pid));
+  std::istringstream linestream =
+      LinuxParser::StringStreamFromStatFile(file_path, to_string(pid));
   int i = 0;
 
   while ((linestream >> v) && (i <= kStartTime_)) {
-    switch(i) {
-      case kUTime_      : utime   = stof(v);
+    switch (i) {
+      case kUTime_:
+        utime = stof(v);
         break;
-      case kSTime_      : stime   = stof(v);
+      case kSTime_:
+        stime = stof(v);
         break;
-      case kCUTime_     : cutime  = stof(v);
+      case kCUTime_:
+        cutime = stof(v);
         break;
-      case kCSTime_     : cstime  = stof(v);
+      case kCSTime_:
+        cstime = stof(v);
         break;
-      case kStartTime_  : starttime  = stof(v);
+      case kStartTime_:
+        starttime = stof(v);
         break;
     }
     i++;
   }
 
-  // See https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+  // See
+  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
   int Hertz = sysconf(_SC_CLK_TCK);
   float total_time = utime + stime + cutime + cstime;
   float seconds = uptime - (starttime / Hertz);
@@ -226,14 +240,16 @@ float LinuxParser::CpuUtilization(int pid) {
 
 int LinuxParser::TotalProcesses() {
   string total;
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(kProcDirectory + kStatFilename, "processes");
+  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(
+      kProcDirectory + kStatFilename, "processes");
   linestream >> total;
   return stoi(total);
 }
 
 int LinuxParser::RunningProcesses() {
   string value;
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(kProcDirectory + kStatFilename, "procs_running");
+  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(
+      kProcDirectory + kStatFilename, "procs_running");
   linestream >> value;
   return stoi(value);
 }
@@ -246,7 +262,7 @@ string LinuxParser::Command(int pid) {
     std::getline(stream, line);
     std::istringstream linestream(line);
     linestream >> comm;
-}
+  }
 
   return line;
 }
@@ -263,7 +279,7 @@ string LinuxParser::Ram(int pid) {
 
       while (linestream >> key >> kbs) {
         if (key == "VmSize:") {
-          ram = to_string(stoi(kbs)/1000);
+          ram = to_string(stoi(kbs) / 1000);
         }
       }
     }
@@ -315,12 +331,13 @@ long LinuxParser::UpTime(int pid) {
   string file_path = kProcDirectory + to_string(pid) + kStatFilename;
   int long value = 0;
 
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(file_path, to_string(pid));
+  std::istringstream linestream =
+      LinuxParser::StringStreamFromStatFile(file_path, to_string(pid));
 
   int i = 0;
   while (linestream >> v) {
-    if(i == kStartTime_) {
-      return stol(v)/sysconf(_SC_CLK_TCK);
+    if (i == kStartTime_) {
+      return stol(v) / sysconf(_SC_CLK_TCK);
     }
     i++;
   }

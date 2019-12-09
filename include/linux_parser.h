@@ -42,13 +42,7 @@ enum CPUStates {
 };
 
 // Uses 0-based indexing
-enum CPUTime {
-  kUTime_ = 12,
-  kSTime_,
-  kCUTime_,
-  kCSTime_,
-  kStartTime_ = 20
-};
+enum CPUTime { kUTime_ = 12, kSTime_, kCUTime_, kCSTime_, kStartTime_ = 20 };
 
 float CpuUtilization();
 long Jiffies();
@@ -63,7 +57,8 @@ std::string Uid(int pid);
 std::string User(int pid);
 long int UpTime(int pid);
 float CpuUtilization(int pid);
-std::istringstream StringStreamFromStatFile(std::string file_path, std::string key);
+std::istringstream StringStreamFromStatFile(std::string file_path,
+                                            std::string key);
 };  // namespace LinuxParser
 
 #endif

@@ -17,10 +17,10 @@ class Process {
   string Ram();
   long int UpTime();
   bool operator<(Process const& a) const;
-  Process(int pid) : pid_(pid) {};
+  Process(int pid) : pid_(pid){};
 
  private:
-   int pid_;
+  int pid_;
 };
 
 #endif

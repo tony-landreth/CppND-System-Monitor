@@ -16,11 +16,11 @@ class System {
   int TotalProcesses();
   int RunningProcesses();
   std::string Kernel();
-  std::string OperatingSystem();      
+  std::string OperatingSystem();
 
  private:
-   Processor cpu_ = Processor();
-   std::vector<Process> processes_ = cpu_.Processes();
+  Processor cpu_ = Processor();
+  std::vector<Process> processes_ = cpu_.Processes();
 };
 
 #endif
