@@ -163,8 +163,8 @@ long LinuxParser::ActiveJiffies() {
 }
 
 long LinuxParser::IdleJiffies() {
-  string line, key, user, nice, system, idle, iowait, irq, softirq, steal;
-  int long value;
+  string line, key, val;
+  int long idle_jiffies;
 
   std::ifstream filestream(kProcDirectory + kStatFilename);
 
@@ -172,15 +172,24 @@ long LinuxParser::IdleJiffies() {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
 
-      while (linestream >> key >> user >> nice >> system >> idle) {
+      // Find the cpu line
+      while (linestream >> key) {
         if (key == "cpu") {
-          value = stol(idle);
+          break;
+        }
+      }
+
+      // Capture Idle Jiffies
+      int i = 0;
+      while (linestream >> val) {
+        if (i == kIdle_) {
+          idle_jiffies = stol(val);
         }
       }
     }
   }
 
-  return value;
+  return idle_jiffies;
 }
 
 float LinuxParser::CpuUtilization() {
