@@ -65,27 +65,22 @@ vector<int> LinuxParser::Pids() {
 }
 
 float LinuxParser::MemoryUtilization() {
-  string mem_total_key = "MemTotal:";
-  string mem_free_key = "MemFree:";
+  string line, key, value;
   float mem_total = 0.0;
   float mem_free = 0.0;
-
-  string line, key, value;
 
   std::ifstream filestream(kProcDirectory + kMeminfoFilename);
 
   if (filestream.is_open()) {
     while (std::getline(filestream, line)) {
       std::istringstream linestream(line);
+      linestream >> key >> value;
 
-      while (linestream >> key >> value) {
-        if (key == mem_total_key) {
-          mem_total = stof(value);
-        }
-        if (key == mem_free_key) {
-          mem_free = stof(value);
-          break;
-        }
+      if (key == "MemTotal:") {
+        mem_total = stof(value);
+      }
+      if (key == "MemFree:") {
+        mem_free = stof(value);
       }
     }
   }
@@ -200,11 +195,11 @@ float LinuxParser::CpuUtilization(int pid) {
 
       while ((linestream >> v) && (counter <= starttime_idx)) {
         counter++;
-        if (counter == utime_idx)   { utime   = stof(v); }
-        if (counter == stime_idx)   { stime   = stof(v); }
-        if (counter == cutime_idx)  { cutime  = stof(v); }
-        if (counter == cstime_idx)  { cstime  = stof(v); }
-        if (counter == starttime_idx)  { starttime  = stof(v); }
+        if (counter == utime_idx)     { utime   = stof(v); }
+        if (counter == stime_idx)     { stime   = stof(v); }
+        if (counter == cutime_idx)    { cutime  = stof(v); }
+        if (counter == cstime_idx)    { cstime  = stof(v); }
+        if (counter == starttime_idx) { starttime  = stof(v); }
       }
     }
   }
