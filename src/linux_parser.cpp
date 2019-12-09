@@ -164,7 +164,7 @@ long LinuxParser::ActiveJiffies() {
 
 long LinuxParser::IdleJiffies() {
   string line, key, val;
-  int long idle_jiffies;
+  int long idle_jiffies = 0;
 
   std::ifstream filestream(kProcDirectory + kStatFilename);
 
@@ -182,9 +182,10 @@ long LinuxParser::IdleJiffies() {
       // Capture Idle Jiffies
       int i = 0;
       while (linestream >> val) {
-        if (i == kIdle_) {
-          idle_jiffies = stol(val);
+        if (i == kIdle_ || i == kIOwait_) {
+          idle_jiffies += stol(val);
         }
+        i++;
       }
     }
   }

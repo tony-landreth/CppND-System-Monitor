@@ -40,6 +40,15 @@ enum CPUStates {
   kGuest_,
   kGuestNice_
 };
+
+enum CPUTime {
+  kUTime_ = 14,
+  kSTime_,
+  kCUTime_,
+  kCSTime_,
+  kStartTime_ = 22
+};
+
 float CpuUtilization();
 long Jiffies();
 long ActiveJiffies();
