@@ -107,29 +107,6 @@ long LinuxParser::Jiffies() {
   return LinuxParser::ActiveJiffies() + LinuxParser::IdleJiffies();
 }
 
-long LinuxParser::ActiveJiffies(int pid) {
-  string line, key, user, nice, system, idle, iowait, irq, softirq, steal;
-  int long value;
-
-  std::ifstream filestream(kProcDirectory + to_string(pid) + kStatFilename);
-
-  if (filestream.is_open()) {
-    while (std::getline(filestream, line)) {
-      std::istringstream linestream(line);
-
-      while (linestream >> key >> user >> nice >> system >> idle >> iowait >>
-             irq >> softirq >> steal) {
-        if (key == "cpu") {
-          value = stol(user) + stol(nice) + stol(system) + stol(irq) +
-                  stol(softirq) + stol(steal);
-        }
-      }
-    }
-  }
-
-  return value;
-}
-
 std::istringstream LinuxParser::StringStreamFromStatFile(string file_path,
                                                          string key) {
   string line, k;
@@ -191,10 +168,22 @@ long LinuxParser::IdleJiffies() {
 }
 
 float LinuxParser::CpuUtilization() {
-  float active = LinuxParser::ActiveJiffies();
-  float total = LinuxParser::Jiffies();
+  float active_t1 = LinuxParser::ActiveJiffies();
+  float total_t1 = LinuxParser::Jiffies();
 
-  return active / total;
+  usleep(1000000);
+
+  float active_t2 = LinuxParser::ActiveJiffies();
+  float total_t2 = LinuxParser::Jiffies();
+
+  float delta_active = active_t2 - active_t1;
+  float delta_total = total_t2 - total_t1;
+
+  if(delta_total == 0.0) {
+    return 0.0;
+  }
+
+  return delta_active / delta_total;
 }
 
 float LinuxParser::CpuUtilization(int pid) {
