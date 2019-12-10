@@ -47,7 +47,6 @@ enum CPUTime { kUTime_ = 12, kSTime_, kCUTime_, kCSTime_, kStartTime_ = 20 };
 float CpuUtilization();
 long Jiffies();
 long ActiveJiffies();
-long ActiveJiffies(int pid);
 long IdleJiffies();
 
 // Processes

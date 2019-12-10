@@ -149,29 +149,6 @@ long LinuxParser::ActiveJiffies() {
   return j_sum;
 }
 
-long LinuxParser::ActiveJiffies(int pid) {
-  string line, key, val;
-  int long j_sum = 0;
-
-  std::istringstream linestream = LinuxParser::StringStreamFromStatFile(
-      kProcDirectory + to_string(pid) + kStatFilename, "cpu");
-
-    int i = 0;
-    while (linestream >> val) {
-      if (i >= kUser_ && i <= kSystem_) {
-        j_sum += stol(val);
-      }
-
-      if (i >= kIRQ_ && i <= kSteal_) {
-        j_sum += stol(val);
-      }
-
-      i++;
-    }
-
-    return j_sum;
-}
-
 long LinuxParser::IdleJiffies() {
   string line, key, val;
   int long idle_jiffies = 0;
