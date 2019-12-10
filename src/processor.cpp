@@ -11,7 +11,9 @@ float Processor::Utilization() { return LinuxParser::CpuUtilization(); }
 std::vector<Process> Processor::Processes() {
   vector<Process> processes = {};
   std::vector<int> pids = LinuxParser::Pids();
-  auto compare = [](const Process a, const Process b) { return a < b; };
+
+  // Sort descending
+  auto compare = [](const Process a, const Process b) { return b < a; };
 
   for (int id : pids) {
     processes.push_back(Process(id));

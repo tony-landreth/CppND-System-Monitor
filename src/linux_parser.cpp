@@ -210,42 +210,28 @@ float LinuxParser::CpuUtilization() {
 }
 
 float LinuxParser::CpuUtilization(int pid) {
-  string line, v;
-  string file_path = kProcDirectory + to_string(pid) + kStatFilename;
-  float utime, stime, cutime, cstime, starttime;
+  string v;
   int uptime = LinuxParser::UpTime();
+  int i = 0, total_time = 0, start_time = 0;
 
   std::istringstream linestream =
-      LinuxParser::StringStreamFromStatFile(file_path, to_string(pid));
-  int i = 0;
+      LinuxParser::StringStreamFromStatFile(kProcDirectory + to_string(pid) + kStatFilename, to_string(pid));
 
-  while ((linestream >> v) && (i <= kStartTime_)) {
-    switch (i) {
-      case kUTime_:
-        utime = stof(v);
-        break;
-      case kSTime_:
-        stime = stof(v);
-        break;
-      case kCUTime_:
-        cutime = stof(v);
-        break;
-      case kCSTime_:
-        cstime = stof(v);
-        break;
-      case kStartTime_:
-        starttime = stof(v);
-        break;
+  while (linestream >> v) {
+    if(i >= kUTime_ && i <= kCSTime_) {
+      total_time += stoi(v);
+    }
+
+    if(i == kStartTime_) {
+      start_time = stoi(v);
     }
     i++;
   }
 
-  // See
-  // https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
+  // Ref: https://stackoverflow.com/questions/16726779/how-do-i-get-the-total-cpu-usage-of-an-application-from-proc-pid-stat/16736599#16736599
   int Hertz = sysconf(_SC_CLK_TCK);
-  float total_time = utime + stime + cutime + cstime;
-  float seconds = uptime - (starttime / Hertz);
-  float cpu_usage = 100 * ((total_time / Hertz) / seconds);
+  float seconds = uptime - (start_time / Hertz);
+  float cpu_usage = (total_time / Hertz) / seconds;
 
   return cpu_usage;
 }
